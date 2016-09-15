@@ -1,0 +1,695 @@
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+  <title></title>
+  <link href="style.css" rel="stylesheet" type="text/css">
+</head>
+
+<body bgcolor="white">
+
+<h2>
+CS144: Web Applications 
+</h2>
+
+<div id="deadline">
+	<b>Project Part 4:</b> <i>Building a Website</i><br />
+	<b>Due on Friday, February 26, 2016, by 11:00PM</b>
+</div>
+
+<!--
+<table width="100%" border="0" cellspacing="10" cellpadding="4">
+  <tbody>
+    <tr>
+      <td bgcolor="#ccccff" width="100%">
+        <center>
+        <b>Project Part 4: Building a Web Site</b><br>
+        <b>Due on Friday, <span style="font-weight:normal; color:#777"><del>February 27</del></span> March 1, 2015, 11:00 PM</b><br>
+        </center>
+      </td>
+    </tr>
+  </tbody>
+</table>
+-->
+
+<ul>
+  <li><p><b>Submission deadline:</b> Programming work is submitted
+    electronically and must be submitted by 11:00 PM. However, we recognize
+    that there might be last minute difficulty during submission process, so as
+    long as you started your sumission process before 11:00PM, you have until
+    11:55PM to completely upload your submission. After 11:55PM, you will have
+    to use grace period as follows.</p>
+  </li>
+  <li><p><b>Late Policy:</b> Programming work submitted after the deadline but
+    less than 24 hours late (i.e., by next day 11:00 PM) will be accepted but
+    penalized 25%, and programming work submitted more than 24 hours but less
+    than 48 hours late (i.e., by two days after, 11:00 PM) will be penalized
+    50%. No programming work will be accepted more than 48 hours late. Since
+    emergencies do arise, each student is allowed a <i>total</i> of four
+    unpenalized late days (four periods up to 24 hours each) for programming
+    work, but no single assignment may be more than two days late.</p>
+  </li>
+  <li><p><b>Honor Code reminder:</b> For more detailed discussion of the Honor
+    Code as it pertains to CS144, please see the Assigned Work page under <a
+    href="../index.html#HONESTY">Honor Code</a>. In summary: You must indicate
+    on all of your submitted work <i>any assistance</i> (human or otherwise)
+    that you received. Any assistance received that is not given proper
+    citation will be considered a violation of the Honor Code. In any event,
+    you are responsible for understanding and being able to explain on your own
+    all material that you submit.</p>
+  </li>
+  <li><p><b>Reminder:</b> Projects must be completed individually or by a team
+    of two.</p>
+  </li>
+  <!--
+  <li>To access sunflower through port 41000:
+    <ul>
+      <li>UCLAWLAN: Requires BOL user id / password or VPN connectivity to
+        connect, but is otherwise unrestricted. In most areas of South Campus,
+        VPN connection is required to get outside of the .cs.ucla.edu or
+        similar networks. No known ports are filtered.</li>
+      <li>UCLA_WIFI: Requires BOL user id / password and has no known port
+        restrictions. It certainly allows http, https, vpn, ssh, rdp, etc.
+        connections.</li>
+      <li>UCLA_WEB: Unauthenticated, open network allowing only http, https,
+        and VPN traffic. Notably, NOT port 41000.</li>
+      <li>UCLA_SECURE: Requires BOL uid/password for WPA2/802.1x security.
+        Requires a capable laptop / device. No known port restrictions.</li>
+      <li>UCLA_RES_WLAN, UCLA_SECURE_RES: Networks on the Hill that connect to
+        the residential network. Requires SafeConnect, network access control
+        software, and antivirus software installed on your computer to connect,
+        even for VPN access. Otherwise, see the corresponding networks above to
+        see how they behave.</li>
+    </ul>
+  </li>
+  -->
+</ul>
+<hr>
+
+<h3>Change History</h3>
+
+<h3>Overview</h3>
+
+<p>In Project 3, you developed the AuctionSearch Web service to provide remote
+access to the eBay data. While a SOAP-based Web service is a great way to allow
+other <em>applications</em> to access your data, it is not necessairly suitable
+for an <em>end user</em>; the user has to write a SOAP client program to access
+your data(!) In this part of the project, you will make the eBay data easily
+accessible by end users through a Web browser, by implementing a Web site on
+top of the Web service. </p>
+
+<p>The Web site that you will implement will integrate three Web services: the
+SOAP-based Web service to the eBay data (built in Project 3), Google Maps (to
+display the location of an item) and Google suggest (to help users formulate
+keyword queries). The overall architecture for this project is shown in the
+diagram below: </p>
+
+<p style="text-align:center; margin:10px auto;"><img src="project4-archi.png"></p>
+
+<p>Note that the bottom-left rectangle is the AuctionSearchService that you
+implemented in Project 3. We will make the same AuctionSearchService available
+at <a
+href="http://oak.cs.ucla.edu/axis2/services/AuctionSearchService">http://oak.cs.ucla.edu/axis2/services/AuctionSearchService</a>,
+so that you can continue with this part of the project without relying on your
+implementation of Project 3. <b>Please make sure to use the oak service for your final submission and demonstration.</b> Your own Web service will <b>NOT</b> be running locally on our grading system. If your code does not use oak, it will not work on our grading system and you will get significant penalty. 
+The two gray rectangles in the
+middle are what will be implemented in Project 4, which integrates the
+AuctionSearch Web service, Google Map and Google Suggest servers. </p>
+
+<p>By completing this project you will be able to learn: </p>
+<ol>
+  <li>How to build a Web site using Java servlet and JSP </li>
+  <li>How to access remote Web services in SOAP and AJAX </li>
+  <li>How to build dynamic user interfaces in Javascript </li>
+</ol>
+<p>We will be providing relevant tutorials and references to help you learn the
+above topics.</p>
+
+<h3>Part A: Implementing Your Basic Web Site</h3>
+
+<p>In Part A, you will be making your eBay data accessible to Web browsers
+through the following two URLs:</p>
+
+<p>(1) <tt>http://localhost:1448/eBay/search?q=xxx&amp;numResultsToSkip=yyy&amp;numResultsToReturn=zzz</tt></p>
+<p>(2) <tt>http://localhost:1448/eBay/item?id=xxx</tt></p>
+
+<p>For the first URL, your application should return the list of ItemID and
+name pairs that contain the keyword(s) "xxx" in their name, category or
+description attributes. "yyy" indicates the number of items to skip from the
+beginning of the list and "zzz" is the maximum number of items to return (if 0,
+it should return all items). For the second URL, your application should return
+the detailed information of the item whose ID is "xxx". For both interfaces,
+you should format the results in HTML, so that the results are easily viewable
+by a Web browser.</p>
+
+<h4>A.1. Learning Application Development on Tomcat</h4>
+
+<p>In Project 3, you used Tomcat (together with Axis2) to publish an existing
+Java object as a Web serivce. In this part of the project, you will use the
+Tomcat server in a more popular context, i.e., serving static and dynamic Web
+pages for Web browsers. As you may know, most web applications/sites consist of
+a fair number of files (like .html, .xml, .jsp, .jpg, .class, ...). In order to
+simplify the deployment of a Web application, Tomcat provides a mechanism to
+put together all files needed for an application in a single file, called
+<em>Web Application Archive</em>. </p>
+
+<p>First, learn how you can develop and create your own Web application archive
+file for your application by reading the following tutorial: </p>
+<ul>
+  <li><a href="../tomcat/index.html">Developing a Web Application on
+    Tomcat</a>. </li>
+</ul>
+<p>Before you proceed to the next step, make sure you understand how to develop
+and deploy a Web site using Java servlet, JSP, and Web application archive from
+the above tutorial.</p>
+
+<p>The <a href="project4.zip">project4.zip</a> file contains the basic skeleton
+code for this project. It contains the <tt>AuctionSearchClient</tt> code (that
+we provided in Project 3) to help you access AuctionSearchService. It also
+contains three servlet classes, <tt>SearchServlet</tt>, <tt>ItemServlet</tt>,
+and <tt>ProxyServlet</tt>, that you will have to implement as part of this
+project. Go over the included <tt>build.xml</tt> file to understand what it
+does. Pay particular attention to the target "build", which essentially does
+the WAR file packaging for your eBay application. Note that all the files in
+<tt>WebContents</tt> directory are automatically added to the WAR file,
+including <tt>WebContents/WEB-INF/web.xml</tt>. Go over the <tt>web.xml</tt>
+file to see how request URLs are mapped to the provided servlet classes. </p>
+
+<h4>A.2. Implementing the Search Interface</h4>
+
+<p>Now that you understand the structure of a Web application archive file and how
+Java servlet and JSP pages can be used to serve dynamic contents, implement the
+Java servlet that provides the search functionality for the eBay data.</p>
+
+<ol>
+  <li><p>First, create an HTML page, <tt>keywordSearch.html</tt>, in your web
+    application which contains a form where the user can enter and submit a
+    keyword query. The form's action should point to your Java servlet
+    available at <a
+    href="http://localhost:1448/eBay/search">http://localhost:1448/eBay/search</a>
+    and pass three parameters: 1) <tt>q</tt>, whose value contains the set of
+    keywords the user types, 2) <tt>numResultsToSkip</tt>, whose value
+    specifies how many items to skip from the beginning, 3)
+    <tt>numResultsToReturn</tt>, whose value tells how many items to return (or
+    display). Let users enter only the value for <tt>q</tt> and let the form
+    automatically generate appropriate values for <tt>numResultsToSkip</tt> and
+    <tt>numResultsToReturn</tt> for nice display. Note that the provided
+    <tt>web.xml</tt> file maps the request to <a
+    href="http://localhost:1448/eBay/search">http://localhost:1448/eBay/search</a>
+    to the <tt>SearchServlet</tt> class.</p>
+    <p><b>Important notes:</b> <em>For all links in your web application,
+    including form actions, you should use relative URLs instead of
+    absolute</em>. The reason is simple: if your links are something of the
+    form "http://localhost:1448/MyWebApp/MyServlet/", they will <em>all
+    break</em> if you make even a minor, unrelated change like switching
+    Tomcat's port from 1448 to 80.</p>
+  </li>
+  <li><p>Implement <tt>SearchServlet</tt> to extract the value of the
+    parameters <tt>q</tt>, <tt>numResultsToSkip</tt>, and
+    <tt>numResultsToReturn</tt> from the request and retrieve the matching
+    results from the eBay data. <!-- The retrieval of matching itemID and name pairs
+    in your Java servlet must be done using the <code>basicSearch</code> Web
+    service available at oak. --> Remember that for your final submission, you will have to modify the
+    ENDPOINT_URL in <tt>AuctionSearchClient.java</tt> to <a
+    href="http://oak.cs.ucla.edu/axis2/services/AuctionSearchService">http://oak.cs.ucla.edu/axis2/services/AuctionSearchService</a>
+    to use the oak service for this project. Once the URL is changed,
+    your servlet code will access oak Web-service functions simply by
+    calling the methods of the <tt>AuctionSearchClient</tt> class.</p> 
+    <p><b>Notes on CLASSPATH:</b> (1) When you implement a Java servlet, your
+    code will depend on the Tomcat servlet library,
+    <tt>$CATALINA_HOME/lib/servlet-api.jar</tt>. To avoid the "class not found"
+    error during compilation, you need to pass the jar file location as the
+    classpath to your Java compiler in your Ant script. However, you should not
+    include <code>servlet-api.jar</code> or any of the other standard Tomcat
+    jars in your .war file's <code>WEB-INF/lib</code> folder. These libraries
+    are already available to all servlets running within Tomcat (all jars in
+    <code>$CATALINA_HOME/lib</code> are), and may actually cause classloader
+    problems if included in your war file. </p>
+    <p>(2) The <tt>AuctionSearchClient</tt> class in depends on the Axis2 library
+    files. To avoid any "class not found" error during compilation, the Axis2
+    jar libraries at <tt>$AXIS2_HOME/lib</tt> should be passed to your Java
+    compiler as a classpath. The library files are already available within
+    Tomcat, so you do not need to include them in your war file.The above
+    classpath issues are automatically taken care of if you use our provided
+    <tt>build.xml</tt> and use the target "build" to compile and package your
+    application.</p> 
+  </li>
+  <li><p>Forward the results of the query to a JSP page, which will display them
+    to the user in a reasonable fashion.</p> </li>
+</ol>
+
+<p>The provided <tt>build.xml</tt> has another target "deploy" that copies the
+.war file built from the target "build" to <tt>$CATALINA_BASE/webapps</tt>. You
+can use this target to copy your packaged WAR file to Tomcat for testing. Take
+a look at the <a href="../ant/tutorial.html">Ant tutorial</a> if you do not
+understand the provided Ant script well.</p>
+
+<h4>A.3. Implementing the Item Interface</h4>
+
+<p>Similarly to the search interface, now create a static HTML page,
+<tt>getItem.html</tt>, and implement <tt>ItemServlet</tt> class that will
+return a page containing all of the details of an item (ItemId, name, start and
+ending time, bid history, etc.) given its ID. The servlet is configured to be
+available at <a
+href="http://localhost:1448/eBay/item">http://localhost:1448/eBay/item</a> in
+the provided <tt>web.xml</tt> file. Your implementation should take the input
+parameter <tt>id</tt> whose value is the itemID of the item that you should
+return. When implementing this servlet, make use of the SOAP service
+<tt>getXMLDataForItemId</tt>, which returns the reconstructed XML
+for a particular item. Take this XML and generate a web page which displays
+this information to the user in a reasonable manner; for example, bids are
+sorted in chronological sequence: the latest bid comes first. One way of doing this may
+be to parse the XML into a JavaBean class of your own design, then pass that
+object to a JSP page for display. Do not simply show the user an XML dump.
+Also, do not generate the HTML output from your servlet directly. Instead,
+forward your request from the servlet to a JSP page. In a nutshell, you should
+assume that web pages are designed for web users so that you must conceal
+non-related messages; for instance, debugging information.</p>
+<!-- Make sure you modify your <code>web.xml</code> to add the correct <code>&lt;servlet&gt;</code> and <code>&lt;servlet-mapping&gt;</code> elements corresponding to your new servlet class and the URL at which the servlet is accessible.-->
+
+<p></p>
+<!-- <p><em>Here again, be careful with the classpath issue for servlet-api.jar and Axis2 libraries.</em></p> -->
+
+<h4>A.4. Adding Navigational Links</h4>
+
+<p>The two interfaces that you just implemented allow the user to discover
+items that are relevant to a given keyword and to access the detailed
+information of an item. However, the site is still difficult to use because (1)
+the two interfaces are completely disconnected and (2) the user always has to
+"go back" to the HTML pages to issue a new query.</p>
+
+<p>Improve the usability of your site by adding the following navigational
+help. </p>
+<ol>
+  <li>On the keyword-search result page (generated from your Search Interface),
+    create clickable links for the ItemIds of each returned item. These links
+    should result in the user receiving a page containing all of the details of
+    that item.</li>
+  <li>On the keyword-search result page, create <b>Next</b> and <b>Previous</b>
+    links to allow users to navigate through next pages or previous pages of 
+    search results.</li>
+  <li>At the top of the keyword-search result page, include a text input box
+    and a submit button by which the user can issue a new keyword-search
+  query.</li>
+  <li>At the top of the item page (generated by your Item Interface), include a
+    text input box and a submit button by which the user can input a new itemID
+    to get its information.</li>
+</ol>
+<p><b>Hints on link-based browsing:</b>: Note that your servlet can be called
+directly through a URL in the following way:<br>
+<tt>http://localhost:1448/eBay/myServlet?param1=value1&amp;param2=value2&amp;param3=value3</tt><br>
+where the string after the question mark contains parameters passed to your
+Java servlet in the <tt>GET</tt> method. So you can implement link-based
+navigation by generating result pages containing hyperlinks of the above
+format, with appropriate parameters that instruct your servlet to return the
+right result.</p>
+
+<h3>Part B: Adding Maps and Query Suggestion</h3>
+
+<p>Now that you have implemented the basic functionality of your Web site, it is
+time to add more help to the users by adding more dynamic UIs. Before you
+proceed, read about <a
+href="http://en.wikipedia.org/wiki/JavaScript_syntax">JavaScript</a> as that is
+the language used throughout Part B. You may also find the Javascript debugger
+<a href="http://www.getfirebug.com/">Firebug</a> (for FireFox) helpful in
+debugging your javascript code for this project.</p>
+
+<h4>B.1. Adding Google Maps</h4>
+
+<p>On your item page, add Google Map to visually display the location of the
+item. Sometimes, To use Google Map on your site, you may need to signup for a <a
+href="http://www.google.com/apis/maps/signup.html">Google Maps API key</a>.
+<b>Where they ask for your web site URL, you'll need to enter
+<code>http://localhost:1448</code>. </b> Once you are assigned a key, you may
+use it in your web pages. However, for the simple(basic) Google Map API, you do
+not need an API key to use it, for instance, a sample HTML page like the following:</p>
+
+<div class="code">
+<p>
+&lt;!DOCTYPE&nbsp;html&gt;
+<br>&lt;html&gt;
+<br>&lt;head&gt;
+<br>&lt;meta&nbsp;name=&quot;viewport&quot;&nbsp;content=&quot;initial-scale=1.0,&nbsp;user-scalable=no&quot;&nbsp;/&gt;
+<br>&lt;style&nbsp;type=&quot;text/css&quot;&gt;
+<br>&nbsp;&nbsp;html&nbsp;{&nbsp;height:&nbsp;100%&nbsp;}
+<br>&nbsp;&nbsp;body&nbsp;{&nbsp;height:&nbsp;100%;&nbsp;margin:&nbsp;0px;&nbsp;padding:&nbsp;0px&nbsp;}
+<br>&nbsp;&nbsp;#map_canvas&nbsp;{&nbsp;height:&nbsp;100%&nbsp;}
+<br>&lt;/style&gt;
+<br>&lt;script&nbsp;type=&quot;text/javascript&quot;
+<br>&nbsp;&nbsp;&nbsp;&nbsp;src=&quot;http://maps.google.com/maps/api/js?sensor=false&quot;&gt;
+<br>&lt;/script&gt;
+<br>&lt;script&nbsp;type=&quot;text/javascript&quot;&gt;
+<br>&nbsp;&nbsp;function&nbsp;initialize()&nbsp;{
+<br>&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;latlng&nbsp;=&nbsp;new&nbsp;google.maps.LatLng(34.063509,-118.44541);
+<br>&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;myOptions&nbsp;=&nbsp;{
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;zoom:&nbsp;14,&nbsp;//&nbsp;default&nbsp;is&nbsp;8&nbsp;
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;center:&nbsp;latlng,
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mapTypeId:&nbsp;google.maps.MapTypeId.ROADMAP
+<br>&nbsp;&nbsp;&nbsp;&nbsp;};
+<br>&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;map&nbsp;=&nbsp;new&nbsp;google.maps.Map(document.getElementById(&quot;map_canvas&quot;),
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;myOptions);
+<br>&nbsp;&nbsp;}
+<br>
+<br>&lt;/script&gt;
+<br>&lt;/head&gt;
+<br>&lt;body&nbsp;onload=&quot;initialize()&quot;&gt;
+<br>&nbsp;&nbsp;&lt;div&nbsp;id=&quot;map_canvas&quot;&nbsp;style=&quot;width:100%;&nbsp;height:100%&quot;&gt;&lt;/div&gt;
+<br>&lt;/body&gt;
+<br>&lt;/html&gt;
+</p>
+<!-- obsolete v2 api sample
+<p>&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"<br>
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"&gt;<br>
+&lt;html xmlns="http://www.w3.org/1999/xhtml"&gt;<br>
+&lt;head&gt;<br>
+&#xa0;&#xa0;&#xa0;&#xa0;&lt;meta http-equiv="content-type" content="text/html;
+charset=utf-8"/&gt;<br>
+&#xa0;&#xa0;&#xa0;&#xa0;&lt;title&gt;Google Maps JavaScript API
+Example&lt;/title&gt;<br>
+&#xa0;&#xa0;&#xa0;&#xa0;&lt;script
+src="http://maps.google.com/maps?file=api&amp;amp;v=2&amp;amp;key=YOUR_KEY_GOES_HERE"
+type="text/javascript"&gt;&lt;/script&gt;<br>
+&lt;script type="text/javascript"&gt;<br>
+//&lt;![CDATA[<br>
+&#xa0;&#xa0;&#xa0;&#xa0;function load() {<br>
+&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;if (GBrowserIsCompatible())
+{<br>
+&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;var map
+= new GMap2(document.getElementById("map"));<br>
+&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;map.setCenter(new
+GLatLng(37.4419, -122.1419), 13);<br>
+&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;}<br>
+&#xa0;&#xa0;&#xa0;&#xa0;}<br>
+//]]&gt;<br>
+&lt;/script&gt;<br>
+&lt;/head&gt;<br>
+&lt;body onload="load()" onunload="GUnload()"&gt;<br>
+&#xa0;&#xa0;&#xa0;&#xa0;&lt;div id="map" style="width: 500px; height:
+300px"&gt;&lt;/div&gt;<br>
+&lt;/body&gt;<br>
+&lt;/html&gt;<br>
+</p>
+-->
+</div>
+
+<p>
+To see what will happen in the above example: <a href="gmap-example.html">click here</a>.
+You should copy the relevant parts of this sample into the JSP page you use
+for processing results<!--, replacing YOUR_KEY_GOES_HERE with the API key you've
+been assigned-->. This example uses latitude and longitude to specify where to
+center the map. You'll need to browse the <a
+href="https://developers.google.com/maps/documentation/javascript/tutorial" target="_blank">Google Maps API</a> to
+discover how you can translate a location string like "Los Angeles, CA" into a
+set of coordinates to display on the map. This type of address to coordinate
+mapping is typically referred to as "geocoding". </p>
+
+<p>For some "locations" you may not find a valid set of coordinates (e.g.
+locations like "PAYPAL OK"). For these, you may choose to simply not display a
+map, display a generic map such as of the entire world, or something else.
+Whatever you choose, it should be user-friendly, so avoid showing cryptic error
+messages or alert windows.</p>
+
+<p>The basic map you just create must include the required limited
+functionality, in paticular, navigation and zoom-in/zoom-out, but
+feel free to spice things up by adding animations, information overlays,
+additional map controls, and more.</p>
+
+<h4>B.2. Adding Query Suggestion</h4>
+
+<p>Your auction site users may not know exactly what they want to search for,
+so in this last part you will be helping them formulate queries using <a
+href="http://www.google.com/webhp?complete=1&amp;hl=en">Google Suggest</a>. Try
+out their query interface to get a feel for what it does. When you are finished
+with Part B.2, the keyword-query box on your Auction Search web site should
+behave similarly to the one on Google suggest.</p>
+
+<p>The Google suggest interface uses AJAX to "silently" submit requests to a <a
+href="http://www.google.com/complete/search?output=toolbar&amp;q=foo">REST-style
+Web Service</a> in response to user input (keypresses). The replies are parsed,
+and the returned suggestions are used to populate the drop-down list of
+suggestions. As we learned in the class, this interaction takes place using the
+XMLHttpRequest JavaScript object. Before you go any further, be sure you've
+read the required reading about <a
+href="http://www.adaptivepath.com/ideas/ajax-new-approach-web-applications/">AJAX</a>, <a
+href="http://en.wikipedia.org/wiki/JavaScript_syntax">JavaScript</a>, <a
+href="http://www.w3schools.com/js/js_htmldom.asp">DOM</a>, and <a
+href="http://en.wikipedia.org/wiki/XMLHttpRequest">XMLHttpRequest</a>.</p>
+
+<h4></h4>
+
+<h5>B.2.1. Developing a Google-Suggest Proxy</h5>
+
+<p>Due to the asynchronous nature of AJAX, security is naturally a big concern
+when using JavaScript. To reduce some security risks, <a
+href="http://www.devarticles.com/c/a/JavaScript/JavaScript-Security/">JavaScript
+security</a> enforces a "same-origin policy", which means that the scripts on a
+page may only access information within the same domain. For example, a script
+on a page like "http://localhost:1448/MySite/index.html" cannot make a request
+for information from, say, google.com.</p>
+
+<p>As a result, you will need to write a proxy (which runs on your Tomcat
+server) to pass requests between your query interface page and Google's suggest
+service. This proxy can be implemented by the <tt>ProxyServlet</tt> class that
+we provided which is configured to accept HTTP GET requests at <a
+href="http://localhost:1448/eBay/suggest">http://localhost:1448/eBay/suggest</a>.
+Your implementation should extract the passed-in query string, issues a request
+to the Google suggest service for that query (at
+<tt>http://google.com/complete/search?output=toolbar&amp;q=&lt;your
+query&gt;</tt>), and returns the results back to the original caller. You may
+find the Java class <a
+href="http://download.java.net/jdk7/archive/b123/docs/api/java/net/HttpURLConnection.html">java.net.HttpURLConnection</a>
+helpful in building your proxy. Note that your servlet should return the
+<em>exact</em> XML data received from Google. You should thoroughly test your
+proxy (by issuing REST-style requests to it and checking the results) before
+moving on to the next step. Also note that, as your servlet should be returning
+XML, your browser may not render it properly (you may see just a blank page).
+Check the 'view source' option in your browser to see the data. Finally, if you
+intend to use responseXML to access Google suggest responses as an XML DOM,
+make sure that your proxy sets the "Content-Type:" HTTP header field to
+"text/xml" in its response. Otherwise, your browser wouldn't be able to
+recognize the response as an XML data, and won't be able to set responseXML
+correctly. You can set the content type of a Java servlet reponse by calling
+the <code>setContentType()</code> function of the response object.</p>
+
+<h4></h4>
+
+<h5>B.2.2. Developing a Google-Suggest Client</h5>
+
+<p>After you have a functioning proxy, you'll need to write the "client" code
+in your query interface page which issues requests to your proxy as the user
+types and shows a list of suggestions. To do this, you will need to write a set
+of <em>event driven</em> (asynchronous) functions in JavaScript which submit
+requests and process results by populating a drop-down text box with a list of
+suggestions. By asynchronous, we mean that these functions are invoked as the
+result of "events", such as user key presses and data arrival, rather than by
+some control flow as is typical in procedural programming.</p>
+
+<p>While there exist a number of excellent javascript libraries (e.g. <a
+href="http://jquery.com/">jQuery</a>, <a
+href="http://dojotoolkit.org/">Dojo</a>, and <a
+href="http://developer.yahoo.com/yui/">Yahoo! UI</a>) that provide javascript
+implementations of common AJAX user interfaces like tooltips, auto-completes
+and drop-down-boxes, you need to provide your own implementation of drop-down
+box for this part of the project. (it is okay to use existing javascript
+libraries for other parts of the project if you want to.)
+<!-- If this is your first experience writing JavaScript, expect it to take a good amount of time to complete this part. -->
+For the creation of a dynamic drop-down box in javascript, the following pages
+provide an excellent tutorial: </p>
+<ul>
+  <li><del><a
+    href="http://www.webreference.com/programming/javascript/ncz/">Creating an
+    Autosuggest Textbox with JavaScript, Part 1</a></del> (<a
+    href="../javascript/suggest1.html">Local mirror</a>) </li>
+  <li><del><a
+    href="http://www.webreference.com/programming/javascript/ncz/column2/">Creating
+    an Autosuggest Textbox with JavaScript, Part 2</a></del> (<a
+    href="../javascript/suggest2.html">Local mirror</a>) </li>
+</ul>
+
+<p>Go over the above tutorial to learn about the HTML elements and their
+associated events to create a drop-down-box like interface for query
+suggestion. The tutorial provides a number of code snippets, which you are
+welcome to use for your implementation. Your implementation of Google Suggest
+should behave similarly to the one on Google Suggest. <b>In particular, as the
+minimum requirement, you must ensure that as the user types input, a list of
+suggestions are populated based on the partial query, which the user can
+navigate with the mouse pointer or up/down arrows and choose with the enter
+key or mouse click button. Moreover, under no circumstance do your code
+crash when a user is navigating the list.</b></p>
+
+<!-- You may find it helpful to start by reviewing the <a href="http://www.w3.org/TR/XMLHttpRequest/">W3C XMLHttpRequest object specification</a>, as well as the W3C <a href="http://www.w3.org/TR/html4/interact/forms.html">HTML forms syntax description</a> and discussion of <a href="http://www.w3.org/TR/html4/interact/scripts.html">scripts in HTML</a>. Pay particular attention to what events are defined, how scripts may be invoked as the result of an event.</p>
+<p>You may find the article <a href="http://serversideguy.blogspot.com/2004/12/google-suggest-dissected.html">Google Suggest Dissected</a> helpful in figuring out how you can create a drop-down-list-like box that contains the list of suggestions.</p> -->
+
+<p>Remember that, when you issue a request to your servlet, you'll likely be
+encoding the user's (partial) query in the URL. You need to "escape" special
+characters in URL. For example, a space in a URL should be converted to "%20".
+You do not need to manually do this replacement - most "web" languages, like
+javascript, contain functions to do the proper URL encoding for a string, which
+you simply need to call.</p>
+
+<h4>Additional Notes for Project 4</h4>
+
+<p>For all of Project 4, the mentioned functionality is the minimum
+requirement. You are free, and of course encouraged, to add additional
+features, make the page more user friendly, etc. Also, you are not required to
+implement things exactly as indicated above. You may choose to, for example,
+display item details in a popup bubble using some AJAX UI library instead of on
+a separate page.</p>
+
+<p>You must, however, abide by the requirement that your displayed result pages
+must be for "human consumption" - not just XML data. Also, your site should
+handle errors "gracefully". Your site should not show a cryptic Java error
+message to the user. Finally, your should not use an existing javascript
+library for Part B.2 of this project.</p>
+
+<h4><hr></h4>
+
+<h3>Showing your Website</h3>
+
+<p>By now you should already have a working website, and in this section you are going to 
+prove it. In order to do this, you are asked to use the <a target="_blank" href="http://seleniumhq.org"><b>
+Selenium</b></a> project, specifically, the <a href="http://docs.seleniumhq.org/projects/ide/" target="_blank">
+Selenium IDE</a>.</p>
+
+<h4>What is Selenium IDE?</h4>
+
+<p>Selenium IDE is designed for automating browser tests. It is essentially a Firefox browser plug-in. 
+Primarily, it is for automating web application tests. However, here we use Selenium as a "screen action 
+recorder". That is, Selenium will allow you to record a sequence of actions on your website, and the 
+grader will be able to <b>replay</b> such actions flow.</p>
+
+<h4>Installing Selenium IDE</h4>
+
+<ol>
+   <li>Install <a href="http://mozilla.org/en-US/firefox/new/" target="_blank"><b>Firefox</b></a> if you do not 
+   have in your host machine. Note that you should <b>NOT</b> install it on your virtual machine. The VM 
+   will function as the web server, and your host machine will be the client trying your website. 
+   (Please download the latest released version).</li>
+   
+   <li>Download the latest version of the <a href="http://docs.seleniumhq.org/download/" target="_blank">
+   <b>Selenium IDE</b></a>. In your Firefox browser, when you click the download link, it will pop up a 
+   window to proceed with the installation.</li>
+   
+   <li>Check out the following video tutorial:</li>
+</ol>
+   <div style="margin: 10px auto; text-align:center;">
+   <iframe width="650" height="420" src="http://www.youtube.com/embed/mFGC5ECoSyI" frameborder="0" allowfullscreen>
+   </iframe>
+   </div>
+
+<h4 style="text-align:center">Using Selenium IDE</h4>
+   <div style="margin: 10px auto; text-align:center;">
+   <iframe width="650" height="420" src="http://www.youtube.com/embed/Q3eWlYOH_bo" frameborder="0" allowfullscreen>
+   </iframe>
+   </div>
+
+   <p>
+	<ol>
+            <li><code>t1.html</code>: use your search page to search for <strong>superman</strong>.
+                Then you should click the "next page" and "previous page" in your search result. Type "superman" again in the search box in the search result page.
+The next step is clicking the first item in the "superman" searching result (it should be <em>a link pointing to a page that displays information about the item 1049430907</em>).</li>
+            <li><code>t2.html</code>: use your search page to search for <strong>superman</strong> and click the second result(1045823269)</li>
+           <li><code>t3.html</code>: use your item search page to search for <strong>1045348061</strong>. In the result page, search for <strong>123456789 </strong>.</li>
+            <li><code>t4.html</code>: use your item search page to search for an empty query(click the search button directly) </li>  
+</ol>
+
+<!--	<i>...Test cases to be anounced...</i> -->
+   </p>
+
+<h4><hr></h4>
+
+<h3><a id="SUBMIT" name="SUBMIT"></a>What to Submit</h3>
+
+<p>In this project you are creating a web site, consisting of both static
+content (HTML pages, images, etc.) and dynamic content (JSP pages, Java
+Servlets). This content is wrapped up as a Web application archive (.war) file
+which can be deployed on Tomcat.</p>
+
+<p>Your submission should consist of a single <b>project4.zip</b> file: </p>
+<pre class="code">project4.zip
+ |
+ + team.txt
+ |
+ + README.txt
+ + build.xml
+ + TestCases
+ |  + t1.html
+ |  + t2.html
+ |  + t3.html
+ |  + t4.html
+ + WebContents
+ |  + keywordSearch.html
+ |  + getItem.html
+ |  + additional files (*.html, *.jsp, *.css, *.js, image files)
+ |  + WEB-INF
+ |      + web.xml
+ + src
+ |  + java source codes for the servlet (with your own naming/structure)
+ |
+ + lib
+    + external java libraries used (not available in our VM)</pre>
+
+<p>The <tt>team.txt</tt> is a plain-text file (no word or PDF, please) that contains the UID(s) of every member of your team. If you work alone, just write your UID (e.g. 904200000). <br /> If you work with a partner, write both UIDs separated by a comma (e.g. 904200000, 904200001). <b>DO NOT put any other content, like your names, in this file!</b></p>
+<p>The <tt>build.xml</tt> in the zip file should have the target "build" that
+builds your web site into a single .war file, and the target "deploy" that
+deploys that .war file on the Tomcat server pointed to by the environment
+variable <code>$CATALINA_HOME</code>.
+<!-- This will automate the steps you learned in <a href="http://help.avs.com/OpenViz/deployment/elements/java/warfile/warfile.html">how to manually create a .war file</a> and deployment into a single command. -->
+That is, <b>we should be able to simply unzip your submission and run "ant
+build" and "ant deploy" to deploy your web site on our machine.</b></p>
+  
+    <p>Note that your final submission should
+    include <em>all</em> files for this project. Add any
+    additional notes or comments that you think will be helpful to the
+    README.txt file. Once your submission file <b>project4.zip</b> is ready,
+    submit via our submission page at &#xa0;<a
+    href="http://ccle.ucla.edu/course/view/15W-COMSCI144-1"><strong>CCLE</strong></a>&#xa0;.</p>
+
+<p>As always, remember to allow sufficient time to prepare your submission once
+your work is complete. </p>
+
+<h4>Testing of Your Submission</h4>
+
+<p>The "grading script" for your submission is the file
+<a href="p4_test">p4_test</a>, which can be executed like:</p>
+<pre class="code">cs144@cs144:~$ ./p4_test project4.zip</pre>
+<p>Add the path to the zip file if necessary after downloading the script and set its permission appropriately.</p>
+
+<p>You <b>MUST</b> test your submission using the script before your final
+submission to minimize the chance of an unexpected error during grading. 
+Please <b>make sure that your submission uses oak service</b>, not your
+own local Web service. When evertything runs properly, you will see an output similar to the following from
+the grading script:</p>
+
+<pre class="code">Stopping tomcat server if it is running...
+Running 'ant build' to build your war file...
+
+   ... output from ant ...
+
+Removing existing eBay application files on Tomcat...
+Deploying your eBay application...
+
+   ... output from ant ...
+
+Now your Tomcat server is running with your application.
+Please access your application through your browser.
+Make sure that all application functionalities are working fine.
+Don't forget to stop Tomcat server once you are done.</pre>
+
+<p>After you run the script, make sure to check the functionality of your site
+using the Firefox browser in the VM and stop the Tomcat server when you are
+done.</p>
+
+<h3>Grading Criteria</h3>
+
+<p>Overall grading breakdown is as below and each feature will be tested with simple cases and tricky cases.</p>
+<ul>
+  <li>Servlet/JSP (40%) </li>
+  <li>Google Map (20%) </li>
+  <li>Google Suggestion / Search Interface (40%) </li>
+</ul>
+<!--
+<p>Project 4 has a minimum set of requirements which the grader will verify by building, deploying, and navigating your site. All students must submit by the deadline following the procedure outlined above.</p>
+<p>If you implement additional features for which you would like to provide an interactive demonstration (e.g. their use is not easily described in your README), you may schedule a time to provide a live demo of your web site by contacting the TA. You will not be penalized for not providing a live demo, it's merely an opportunity to show off some &quot;advanced&quot; features of your site.</p>
+-->
+</body>
+</html>
