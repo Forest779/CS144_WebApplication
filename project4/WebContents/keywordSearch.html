@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>keywordSearch.html</title>
+		<script type="text/javascript" src="autosuggest.js"></script>
+		<link rel="stylesheet" type="text/css" href="autosuggest.css" /> 
+		<link rel="stylesheet" type="text/css" href="keywordSearch.css" /> 
+		<script type="text/javascript">
+    		window.onload = function () {
+				var begin = new AutoSuggestControl(document.getElementById("qbox"));  
+      		}
+		</script> 
+		<title>keywordSearch.html</title>
+	</head>
+	<body>
+		<form action="search" method="get">
+			<input type="text" id="qbox" name="q" autocomplete="off" placeholder="Search Keyword.."/>
+			<input type="hidden" name="numResultsToSkip" value="0" />
+			<input type="hidden" name="numResultsToReturn" value="10" />
+			<input type="submit" value="SEARCH"/>
+		</form>
+	</body>
+</html>
