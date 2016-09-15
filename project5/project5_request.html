@@ -1,0 +1,461 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+  <link href="style.css" rel="stylesheet" type="text/css">
+  <title>Project 5 (CS144)</title>
+</head>
+
+<body style="background-color: white;">
+
+<center>
+<font color="#bb0000" size="+2">CS144: Web Applications</font> </center>
+
+<table border="0" cellpadding="4" cellspacing="10" width="100%">
+  <tbody>
+    <tr>
+      <td bgcolor="#ccccff" width="100%">
+        <center>
+        <b>Project Part 5: Enabling Secure Transaction</b><br>
+        <b>All Parts due: February, March 11, 2016 11:00 PM</b> </center>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li><p><b>Please note the hard submission deadline.</b> No submission will be
+    accepted after 2 day of deadline even you have more grace period left,
+    11:00PM. </p>
+  </li>
+  <li><p><b>Submission deadline:</b> Programming work is submitted
+    electronically and must be submitted by the deadline. However, we recognize
+    that there might be last minute difficulty during submission process, so as
+    long as you started your submission process before 11:00PM, you have until
+    11:55PM to completely upload your submission. After 11:55PM, you will have
+    to use grace period as follows.</p>
+  </li>
+  <li><p><b>Late Policy:</b> Since emergencies do arise, each student is
+    allowed a <i>total</i> of four unpenalized late days (four periods up to 24
+    hours each) for programming work, but the final assignment can be more than
+    two days late. If you <strong>"run out of"</strong> your grace period, you
+    will get penalized 25% for 1 day delay, and you will be penalized 50% for 2
+    day delay. No programming work will be accepted more than 48 hours late (48
+    hours is a hard deadline). <!-- <span style="color: red;">Because of the coming
+    of final week, any submission after 11:00PM on Tuesday (03/17/2015) won't be
+    accepted unless special approval from professor "before" the
+    deadline.</span> Again, 48 hours after the due date is an absolute hard
+    deadline, and any submission after that will be rejected. (That is, 0
+    points) --></p>
+  </li>
+  <li><p><b>Honor Code reminder:</b> For more detailed discussion of the Honor
+    Code as it pertains to CS144, please see the Assigned Work page under <a
+    href="../index.html#HONESTY">Honor Code</a>. In summary: You must indicate
+    on all of your submitted work <i>any assistance</i> (human or otherwise)
+    that you received. Any assistance received that is not given proper
+    citation will be considered a violation of the Honor Code. In any event,
+    you are responsible for understanding and being able to explain on your own
+    all material that you submit.</p>
+  </li>
+  <li><p><b>Reminder:</b></p>
+    <ul>
+      <li>Projects must be completed individually or by a team of two.</li>
+      <li>You <strong>CANNOT</strong> disclose and discuss any security
+        strategy you plan to use/implement in this project to others. You can
+        only ask for clarification if something is unclear in spec. Any
+        violation may cause penalty to your grade or might be considered as a
+        violation of the Honor Code. If you're not sure whether you should
+        "announce" your question/answer to google group or not, send a private
+        email to TA before you post through google group.</li>
+    </ul>
+  </li>
+</ul>
+<hr>
+<!--
+<h3>Change History</h3>
+<p><b>02/20/2009 4:30PM</b>: This project was first created in Winter 2009.</p>
+<p><b>03/05/2009 1:30PM</b>: Update on figure 1 and figure 2. (Add item name)</p>
+<p><b>03/06/2009 11:55PM</b>: Clarification: to make the project simple, you should show all credit card number in confirm page.</p>-->
+
+<h2>Enabling Secure Transaction</h2>
+
+<p>In Project 4, you developed search and browse interfaces to help users
+access items on eBay. In this project, you extend your Project 4 to
+allow users to pay for an item by inputting their credit card number. Before
+you move on, read the following two tutorials to learn how to enable SSL on
+tomcat and how to keep information through a sequence of pages using http
+session: </p>
+<ul>
+  <li><a href="../tomcat/ssl_tomcat_tutorial.html">Enabling SSL on Tomcat</a> </li>
+  <li><a href="../java/session/index.html">Creating a sesson-enabled servlet</a>
+  </li>
+</ul>
+Your task for this part of the project is to enable the following sequence of
+steps on your tomcat server to obtain the user's credit card number:
+
+<p><b>Transaction workflow</b> </p>
+<ol>
+  <li>On an item page (i.e., a page that is returned from the
+    <code>ItemServlet</code> class in Project 4) if the item has "Buy_Price",
+    you should display a "Pay Now" link. </li>
+  <li>When the user clicks on the "Pay Now" link, your server should lead the
+    user to the "credit-card-input page" that shows the ItemID, Item Name and
+    Buy_Price (and optionally other information) of the item that the user is
+    paying for. In addition, the page should contain one input box to let the
+    user type a credit card number. For simplicity, we assume that a credit
+    card number is enough for authorizing a transaction (i.e., card holder
+    name, expiration date, etc. are not needed). </li>
+  <li>Once the user presses the "Submit" button on the credit-card-input page,
+    your server should show the final "confirmation page", where the user can
+    see the ItemID, Item Name, Buy_Price, credit card number, and transaction
+    time (and optionally other information that you think is relevant). </li>
+</ol>
+The image below illustrates the sequence of the pages that the user will see
+through these steps:
+
+<p><img style="width: 50%;" alt="fig_schema_1" title="fig_schema_1"
+src="fig_schema_1.png"></p>
+Your task for this project is to implement the relevant Java servlet classes
+and JSP pages to support the above transaction workflow. Of course, you are
+taking a serious security risk when you enable online transaction by the users,
+so you have to be extra careful. In particular, you are working with the
+following important requirements for this project:
+
+<p></p>
+
+<p><b>Basic requirements</b> </p>
+<ol>
+  <li>Protecting the credit card number from a malicious third party is
+    essential. No one should be able to eavesdrop on your communication and
+    obtain your customer's credit card number while it is in transit over the
+    Internet. </li>
+  <li>There should be no possibility for a malicious (and technically savvy)
+    user to purchase an item for a price other than its Buy_Price. </li>
+</ol>
+For simplicity, other requirements that may be important for a real-world Web
+site are not enforced in this project. For instance, we do not worry about
+whether the user-provided credit card number is fraudulent or not, and we do
+not check whether the user who pays for an item is the same user who won the
+auction or not. Only the above two requirements need to be guaranteed for this
+project.
+
+<p>You may think that you can meet the above requirements simply by (a)
+encrypting every communication between the tomcat server and the user's browser
+with HTTPS and (b) obtaining Buy_Price directly from oak whenever it is
+displayed to the user. Unforutnately things are a bit more comlicated due to a
+few additional preformance-related constraints. We refer to the following
+figure to illustrate these constraints and data flow among the machines. </p>
+
+<p><img style="width: 50%;" alt="fig_schema_2" title="fig_schema_2"
+src="fig_schema_2.png"> </p>
+
+<p></p>
+
+<p><b>Important constraints</b> </p>
+<ol>
+  <li>SSL communication is computationally very expensive, so you need to
+    protect your commuication through HTTPS <em>only when the credit card
+    number is in transit</em>. All other communication between your server and
+    the browser should be done through plain HTTP, not HTTPS.
+    <p>Note that if you want to encrypt a communication from the browser to the
+    server through SSL, you simply need to make the beginning of the request
+    URL "<tt>https://...</tt>" (as long as the URL has the correct port number
+    for the SSL connection). Then both the request to and the response from
+    the server will be encrypted. If you want to make sure that your
+    communication is not encrypted, start your request URL with
+    "<tt>http://...</tt>". You may find the following methods of the
+    <tt>HttpServletRequest</tt> class helpful to avoid hardcoding the server
+    name and the path at which your page will be deployed: <tt>getServerName(),
+    getServerPort(), getContextPath(), isSecure().</tt> </p>
+  </li>
+  <li>Due to the heavy load on the DBMS server at oak, you have to
+    <em>minimize</em> the number of requests sent to oak. Clearly, you
+    cannot avoid contacting oak to obtain the item information while you
+    generate the "item page" (the communication from (0) to (1) in the above
+    figure), but beyond that, the tomcat server CANNOT contact oak for
+    the rest of the transaction. In particular, you are NOT allowed to send a
+    request to oak while you are generating the "credit-card-input page"
+    or the "confirmation page" in order to obtain the item information that is
+    being purchased (i.e., the communication from (3) to oak or from (5)
+    to oak is not allowed). <!--
+    <li>To make matters worse, you have to keep the Tomcat
+    server "stateless". That is, you are not allowed to store any information related to an ongoing transaction either in a file, DBMS, or a global
+    variable of the tomcat server. If a particular information needs to
+    be "remembered" through a sequence of pages (like the ItemID and Buy_Price
+    in the item page, the credit-card-input page and the confirmation page), it should be "pushed"
+    to the client by embedding the information in the URL, cookie or (hidden) form fields.
+    That is, the item information that you obtained through the initial communication from (0) to (1) cannot be stored in the Tomcat server
+    for the rest of transaction. Making a server stateless is extremely
+    helpful when we deploy multiple Tomcat servers for scalability.
+    --></li>
+</ol>
+Given the second constraint, it is clear that the Tomcat server somehow has to
+"remember" the item information obtained through the communication from (0) to
+(1) for the rest of the transaction until the final confirmation page (6) is
+displayed. This can be done in one of the following two ways:
+<ol>
+  <li>The Tomcat server can "push" the information to the client as HTTP
+    cookies, hidden input form fields or as part of a URL link, so that the
+    information is transmitted back to the server when the future request is
+    made. This is essentially asking the browser to "remember" the item
+    information. </li>
+  <li>The Tomcat server itself can remember the information by starting a new
+    HTTP session when the item page is generated and by associating the item
+    information to the HTTP session. Once the session is established, any
+    subsequent HTTP request from the same browser will be part of this session,
+    so Tomcat will be able to retrieve the associted information to process the
+    request. </li>
+</ol>
+Due to the potential risk of the "client-state-manipulation" attack of the
+first approach, we decide to take the second approach in this project by using
+the <tt>javax.servlet.http.HttpSession</tt> interface. If you are still not
+clear on how to use an HTTP session to remember some information through a
+sequence of pages, read our tutorial on HTTP session in servlet again. As you
+implement new servlet class(es) for this project, make sure that you add
+relevant entries in the <tt>web.xml</tt> file for for the URL mapping of your
+servlet class(es).
+
+<p>Since you will need to enable SSL on tomcat, you will need to modify
+<tt>server.xml</tt> in <tt>/etc/tomcat7/</tt> as well. <em>When you
+enable SSL, make sure that you enable it at the port 8443 (the default value
+given in the existing server.xml file).</em> </p>
+
+<p style="font-weight: bold;">Other Notes</p>
+<ol>
+  <li>Some credit card number might be a counterfeited one. In order to
+    validate a credit card number, two common ways are the "Luhn" and "Mod 10"
+    check. (Reference: <a
+    href="http://www.thetaoofmakingmoney.com/2007/04/12/324.html">How To
+    Generate Valid Credit Card Numbers</a>). In this project, you are <span
+    style="font-weight: bold;">NOT</span> asked to implement either one. If you
+    desire, you may want to make sure that the credit card number includes only
+    <span style="font-style: italic;">numbers(0~9), dashes, and spaces</span>
+    and is not empty using Javascript, but even this is not a mandatory
+    requirement of this project.</li>
+</ol>
+
+<!--
+<h2>Part B: Optimizing for Mobile Access</h2>
+Recently, users often access Web sites through their mobile devices, such as
+Apple's iPhone and Google's Android phones. The browsers on these smartphones
+mostly support the full HTML stanard and can access any Web page, but most pages
+are not necessarily easy to view and navigate on a small screen yet. To enhance
+user experience, some web sites now optimize their pages for smartphones, so
+that they are easier to see on a small screen than the others. In this part of
+the project, you now have to adjust the keywordSearch.html page, so that the
+page is appropriately rendered both on a mobile device and a regular PC. You
+are welcome to make your other pages mobile-friendly. To get full credits, you
+at least have to make the <tt>keywordSearch.html</tt> page is properly designed for both browsers
+in smart-phones and PCs. We will explains more details as follows.
+
+<p>To see how pages are optimized for the best experience on a mobile device,
+look at the screen captures of the following two pages. </p>
+
+<center>
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center"><img src="yahoo.jpg" width="240" height="427"><br>
+        <tt>http://www.yahoo.com</tt></td>
+      <td>     </td>
+      <td align="center"><img src="m.yahoo.jpg" width="240" height="427"><br>
+        <tt>http://m.yahoo.com</tt></td>
+    </tr>
+  </tbody>
+</table>
+</center>
+Both pages were captured by an Android device, where the left page is the
+standard Yahoo home page at <tt>http://www.yahoo.com</tt> and the right page is
+the mobile-optimized Yahoo page at <tt>http://m.yahoo.com</tt>. From the left
+screen capture, we can see that the browser faithfully rendered the standard
+home page, but the content of the page is not legible at the default zoom
+level. In order to navigate through the page, the user is requied to zoom in to
+enlarge the particular portion of the page. In contrast, the mobile optimized
+version adheres to the following guidelines to make it easy to navigate on a
+mobile device:
+
+<p></p>
+<ol>
+  <li>The mobile-optimized page has significantly less content than the regular
+    page, leaving out less-frequently accessed content on the page to avoid
+    clutter. </li>
+  <li>The width of the mobile page is set to be the same as the width of the
+    device. This setting ensures that the user is <strong>not required/able to
+    scroll <em>horizontally</em></strong>. The user can scroll <em>the page
+    <strong>only vertically</strong></em> in case the page cannot fit on a
+    single screen. <strong></strong></li>
+  <li>The default font size is large enough, such that the user is
+    not required to zoom-in for reading the content of the page clearly. In
+    fact, many mobile-optimized pages disallow zooming function to prevent
+    accidental zoom in or out by the user. </li>
+</ol>
+To help you optimize your keywordSearch.html page for this project, we have
+installed an Android emulator on our virtual machine. Read our instruction on
+<a href="Android_Tutorial.html">how to start an Android emulator</a> and access
+a few mobile Web sites using the browser in the emulator yourself, such as <a
+href="http://m.nytimes.com">http://m.nytimes.com</a>, <a
+href="http://m.yahoo.com">http://m.yahoo.com</a>, <a
+href="http://m.wsj.com">http://m.wsj.com</a>. Please note that the emulator is
+likely to be VERY slow and may test your patience. <p>
+
+Now that you are familar
+with a few mobile Web pages, your task is to revise the keywordSearch.html
+page, so that it is easy to navigate <em>both</em> on a mobile device
+<em>AND</em> a regular PC. In particular, your new keywordSearch.html page
+should meet the following requirements:
+<ol>
+  <li>On a mobile device, the page width should be set to be the screen width
+    of the device, so that the user is <strong>not able to scroll
+    horizontally</strong> to navigate on the page. </li>
+  <li>The search box and the submit button should not be larger than the width
+    of the screen, again, to avoid any horizontal scrolling. </li>
+  <li>The font of the text on the page should be large enough, so that the user
+    is not required to zoom in to read the text. </li>
+  <li>Disable zoom-in/zoom-out features to prevent accident zoom change on 
+    the webpages.</li>
+  <li>Finally, the page should display "natually" on a regular PC, without
+    giving the obvious indication that the page is specifically designed for a
+    device with a small screen. In other words, you should not limit the width
+    of your page to 360px or less when a user visit your website throguh a
+    traditional browser, such as the Firefox in the virtual machine.</li>
+</ol>
+You are not asked to make the page look very pretty or adding fancy effect for
+a mobile device. However, you are welcome to do it. As long as the page
+functionally accomodate both on a regular PC and a mobile device; namely,
+conforming to the above requirements, you will get full credits for this part
+of the project.
+
+<p>There exist a number of ways to make a page viewable both on a mobile device
+and a regular PC. For example, you can write a Javascript code, such that it
+automatically detects the device width and adjusts the page arrangement
+dynamically. It is also possible to configure your Web server, such that the
+browser is automatically redirected to a mobile version of the site when
+appropriate. While you are free to use any method that you feel comfortable,
+you may find the following article particularly helpful in explaining how you
+can ensure your page to display properly on a mobile device:</p>
+<ul>
+  <li><a
+    href="http://www.alistapart.com/articles/putyourcontentinmypocket/">Put
+    Your Content in My Pocket</a> by Craig Hockenberry </li>
+</ul>
+Even though this article was written specifically for iPhone, any WebKit-based
+mobile browser (such as the one on Android) are likely to work well with these
+techniques. Pay particular attention to the sections on "Adapting" and "Styling
+for the iPhone". These sections explain "viewport" meta tag and CSS Media
+Queries, which can be used to set the default screen width, and to apply
+different CSS styles depending on the screen size of the device, respectively.
+You may also want to read the <a
+href="http://developer.apple.com/safari/library/documentation/appleapplications/reference/safariwebcontent/usingtheviewport/usingtheviewport.html">page
+on viewport meta tag</a> and a <a
+href="http://css-css.com/media-queries/">tutorial on CSS media queries</a> to
+learn more details on these techniques. In revising your keywordSearch.html
+page, you may assume that the screen width of a mobile device will never exceed
+480 pixels.
+
+<p><em>Please ensure that your new keywordSearch.html page displays properly on
+the Firefox browser in our VM and the Android browser in the emulator to get
+full credit.</em> </p>
+-->
+<!--
+, one possibility is to use "CSS Media Queries". CSS Media Queries is part of the CSS standard that enables the browser to apply different styles depending on the screen. You may also find that the non-standard meta tag "viewport" useful in setting the default "viewport" or "zoom scale" of the Web page. While this
+Note that this part of the project does not require you to create a completely separate version of your eBay Web site optmized for mobile devices. It is sufficient to revise just the keywordSearch.html page and nothing else.
+Unfortunately, due to the rapid pace of advancements in the mobile space, there is no "standard" way to write a page viewable both on a PC and a mobile device. Possible options include:
+
+-->
+<hr>
+
+<h3><a id="SUBMIT" name="SUBMIT"></a>What to Submit</h3>
+
+<p>This project is an extension to your Project 4, so your submission zip file
+<b>project5.zip</b> should include <em>all your files for Project 4</em> and a
+few additional files that you implemented for Project 5. The structure of the
+submission zip file should be essentially the same as that of Project 4 as we
+show here: </p>
+<pre class="code">project5.zip <br> |<br> + team.txt <br> |<br> + README.txt<br> + build.xml<br> |<br> + WebContents<br> | + any Web files (*.html, *.jsp, *.css, *.js, image files)<br> | + WEB-INF<br> |   + web.xml<br> + src<br> | + java source codes for the servlet (with your own naming/structure)<br> |<br> + lib<br>   + external java libraries used (not available in our VM)
+</pre>
+<!--
+ + screenshot
+   + desktop.jpg
+   + mobile.jpg
+-->
+
+<p>In the README file, please include the answers to the following questions:
+(A <em>succint answer</em> is enough. Please limit your answer to 100 words per
+question.)</p>
+<ul>
+  <li><b>Q1</b>: For which communication(s) do you use the SSL encryption? If
+    you are encrypting the communication from (1) to (2) in Figure 2, for
+    example, write <tt>(1)&rarr;(2)</tt> in your answer. </li>
+  <li><b>Q2</b>: How do you ensure that the item was purchased exactly at the
+    Buy_Price of that particular item? </li>
+  <li>Note: If you get help from any source other than those mentioned in this
+    page, at the end of your README, please clearly cite all references you
+    use, and breifly explain how they help you, such as which portion(s) is/are
+    particularly helpful.</li>
+</ul>
+<!--
+<p>In the screenshot folder, please include two screenshots
+(<a href="http://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts#Screenshots">Hotkeys</a>)
+<ul>
+  <li><strong>dekstop.html</strong>: showing your keywordsearch.html</li>
+  <li></li>
+</ul>
+-->
+
+<p>The <tt>team.txt</tt> is a plain-text file (no word or PDF, please) that contains the UID(s) of every member of your team. If you work alone, just write your UID (e.g. 904200000). <br /> If you work with a partner, write both UIDs separated by a comma (e.g. 904200000, 904200001). <b>DO NOT put any other content, like your names, in this file!</b></p>
+
+<p>Please make sure that the <tt>build.xml</tt> in the zip file have the target
+"build" that builds your web site into a single <tt>eBay.war</tt> file, and the
+target "deploy" that deploys that .war file on the Tomcat server pointed to by
+the environment variable <code>$CATALINA_BASE</code>. That is, <b>we should be
+able to simply unzip your submission and run "ant build" and "ant deploy" to
+deploy your web site on our machine.</b></p>
+
+<p>Your final submission should include <em>all</em> files to make your Web
+site up and running. Add any additional notes or comments that you think will
+be helpful to the README.txt file. </p>
+
+<p>As always, remember to allow sufficient time to prepare your submission once
+your work is complete. </p>
+
+<h4>Testing of Your Submission</h4>
+The "grading script" for both Parts A and B submissions is the same file
+<a href="p5_test">p5_test</a>, which can be executed like:
+<pre class="code">cs144@cs144:~$ ./p5_test project5.zip</pre>
+Add the path to the zip file if
+necessary after downloading the script and setting its permission appropriately.
+
+<p>You <b>MUST</b> test your submission using the script before your final
+submission to minimize the chance of an unexpected error during grading. When
+evertything runs properly, you will see an output similar to the following from
+the grading script: </p>
+<pre class="code">Stopping tomcat server if it is running...<br>Running 'ant build' to build your war file...<br><br> ... output from ant ...<br><br>Removing existing eBay application files on Tomcat...<br>Deploying your eBay application...<br><br> ... output from ant ...
+<br>Now your Tomcat server is running with your application.<br>Please access your application through your browser.<br>Make sure that all application functionalities are working fine.<br>Don't forget to stop Tomcat server once you are done.<br></pre>
+After you run the script, make sure to check the functionality of your site
+using the Firefox browser in the VM and stop the Tomcat server when you are
+done.
+
+<p>Once your submission file <b>project5.zip</b> is ready, submit via <a href="http://ccle.ucla.edu">CCLE</a>.<!--our
+submission page at <a
+href="http://oak.cs.ucla.edu/cs144/projects/project5/submit/submit.html"><strong>Submit
+Project 5</strong></a> .--!> </p>
+
+<h3>Grading Criteria</h3>
+<ul>
+  <li>Successful build and deploy without any error (20%) </li>
+  <li>Answers to the questions in readme file (20%) </li>
+  <li>Meet the spec(60%, each part is 30%) </li>
+</ul>
+
+<h3>Reference</h3>
+<ul>
+  <li>JSP &amp; Servlet: <a
+    href="http://java.sun.com/developer/technicalArticles/javaserverpages/servlets_jsp/">http://java.sun.com/developer/technicalArticles/javaserverpages/servlets_jsp/</a>
+  </li>
+</ul>
+<!--
+<p>Project 4 has a minimum set of requirements which the grader will verify by building, deploying, and navigating your site. All students must submit by the deadline following the procedure outlined above.</p>
+<p>If you implement additional features for which you would like to provide an interactive demonstration (e.g. their use is not easily described in your README), you may schedule a time to provide a live demo of your web site by contacting the TA. You will not be penalized for not providing a live demo, it's merely an opportunity to show off some &quot;advanced&quot; features of your site.</p>
+-->
+</body>
+</html>
